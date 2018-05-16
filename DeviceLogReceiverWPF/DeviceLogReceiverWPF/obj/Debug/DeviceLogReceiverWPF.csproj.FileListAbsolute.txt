@@ -1,0 +1,17 @@
+D:\Program\HoloLab\HoloLabToolkit\DeviceLogSystem\DeviceLogReceiverWPF\DeviceLogReceiverWPF\bin\Debug\DeviceLogReceiverWPF.exe.config
+D:\Program\HoloLab\HoloLabToolkit\DeviceLogSystem\DeviceLogReceiverWPF\DeviceLogReceiverWPF\bin\Debug\DeviceLogReceiverWPF.exe
+D:\Program\HoloLab\HoloLabToolkit\DeviceLogSystem\DeviceLogReceiverWPF\DeviceLogReceiverWPF\bin\Debug\DeviceLogReceiverWPF.pdb
+D:\Program\HoloLab\HoloLabToolkit\DeviceLogSystem\DeviceLogReceiverWPF\DeviceLogReceiverWPF\bin\Debug\Newtonsoft.Json.dll
+D:\Program\HoloLab\HoloLabToolkit\DeviceLogSystem\DeviceLogReceiverWPF\DeviceLogReceiverWPF\obj\Debug\DeviceLogReceiverWPF.csprojResolveAssemblyReference.cache
+D:\Program\HoloLab\HoloLabToolkit\DeviceLogSystem\DeviceLogReceiverWPF\DeviceLogReceiverWPF\obj\Debug\MainWindow.g.cs
+D:\Program\HoloLab\HoloLabToolkit\DeviceLogSystem\DeviceLogReceiverWPF\DeviceLogReceiverWPF\obj\Debug\App.g.cs
+D:\Program\HoloLab\HoloLabToolkit\DeviceLogSystem\DeviceLogReceiverWPF\DeviceLogReceiverWPF\obj\Debug\DeviceLogReceiverWPF_MarkupCompile.cache
+D:\Program\HoloLab\HoloLabToolkit\DeviceLogSystem\DeviceLogReceiverWPF\DeviceLogReceiverWPF\obj\Debug\DeviceLogReceiverWPF_MarkupCompile.lref
+D:\Program\HoloLab\HoloLabToolkit\DeviceLogSystem\DeviceLogReceiverWPF\DeviceLogReceiverWPF\obj\Debug\MainWindow.baml
+D:\Program\HoloLab\HoloLabToolkit\DeviceLogSystem\DeviceLogReceiverWPF\DeviceLogReceiverWPF\obj\Debug\DeviceLogReceiverWPF.g.resources
+D:\Program\HoloLab\HoloLabToolkit\DeviceLogSystem\DeviceLogReceiverWPF\DeviceLogReceiverWPF\obj\Debug\DeviceLogReceiverWPF.Properties.Resources.resources
+D:\Program\HoloLab\HoloLabToolkit\DeviceLogSystem\DeviceLogReceiverWPF\DeviceLogReceiverWPF\obj\Debug\DeviceLogReceiverWPF.csproj.GenerateResource.cache
+D:\Program\HoloLab\HoloLabToolkit\DeviceLogSystem\DeviceLogReceiverWPF\DeviceLogReceiverWPF\obj\Debug\DeviceLogReceiverWPF.csproj.CoreCompileInputs.cache
+D:\Program\HoloLab\HoloLabToolkit\DeviceLogSystem\DeviceLogReceiverWPF\DeviceLogReceiverWPF\obj\Debug\DeviceLogReceiverWPF.csproj.CopyComplete
+D:\Program\HoloLab\HoloLabToolkit\DeviceLogSystem\DeviceLogReceiverWPF\DeviceLogReceiverWPF\obj\Debug\DeviceLogReceiverWPF.exe
+D:\Program\HoloLab\HoloLabToolkit\DeviceLogSystem\DeviceLogReceiverWPF\DeviceLogReceiverWPF\obj\Debug\DeviceLogReceiverWPF.pdb
