@@ -55,15 +55,20 @@ namespace DeviceLogReceiverWPF
             // restAPI
             string user = "hololab";
             string pass = "hololab";
+            username.Text = user;
+            password.Text = pass;
             Task.Run(async () =>
             {
                 ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslpolicyerrors) => true;
                 HttpClient httpClient = new HttpClient();
-                var param = Convert.ToBase64String(Encoding.UTF8.GetBytes(user + ":" + pass));
-                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", param);
                 while (true)
                 {
                     int count = 0;
+                    await username.Dispatcher.BeginInvoke(new Action(() => { user = username.Text; }));
+                    await password.Dispatcher.BeginInvoke(new Action(() => { pass = password.Text; }));
+                    Console.WriteLine(user);
+                    var param = Convert.ToBase64String(Encoding.UTF8.GetBytes(user + ":" + pass));
+                    httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", param);
                     foreach (var item in deviceIPList)
                     {
                         var result = httpClient.GetAsync("https://" + item + "/api/power/battery").Result;

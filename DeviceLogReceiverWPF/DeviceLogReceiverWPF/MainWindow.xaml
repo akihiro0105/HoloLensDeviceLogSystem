@@ -6,8 +6,12 @@
         xmlns:local="clr-namespace:DeviceLogReceiverWPF"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        <ListBox x:Name="ListBox1" Margin="10,10,10.333,9.667"/>
+    <Grid HorizontalAlignment="Left" Margin="0,0,0,-0.333" Width="793">
+        <ListBox x:Name="ListBox1" Margin="10,10,0,10" HorizontalAlignment="Left" Width="477"/>
+        <TextBox x:Name="username" HorizontalAlignment="Left" Height="23" Margin="568,14,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="120"/>
+        <Label Content="Username" Margin="492,10,238,0" VerticalAlignment="Top"/>
+        <Label Content="Password" HorizontalAlignment="Left" Margin="495,41,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="password" Height="23" Margin="568,45,105,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top"/>
 
     </Grid>
 </Window>
