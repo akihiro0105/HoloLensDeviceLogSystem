@@ -24,87 +24,135 @@ namespace DeviceLogReceiverWPF
     /// </summary>
     public partial class MainWindow : Window
     {
+        /// <summary>
+        /// UDP受信IPアドレスリスト
+        /// </summary>
+        private List<string> ipList = new List<string>();
+
         public MainWindow()
         {
             InitializeComponent();
-            List<string> deviceIPList = new List<string>();
-            // UDP Receiver
-            UDPListenerManager listener = new UDPListenerManager(8080);
+
+            // UDP受信処理
+            var listener = new UDPListenerManager(8080);
             listener.ListenerMessageEvent += (ms, ip) =>
             {
-                JsonMessage jm = new JsonMessage();
-                jm = JsonConvert.DeserializeObject<JsonMessage>(ms);
-                if (deviceIPList.BinarySearch(ip) < 0)
-                {
-                    deviceIPList.Add(ip);
-                    ListBox1.Dispatcher.BeginInvoke(new Action(() =>
-                    {
-                        StackPanel stp = new StackPanel();
-                        stp.Orientation = Orientation.Horizontal;
-                        stp.Children.Add(new TextBlock() { Text = " " + jm.device });
-                        stp.Children.Add(new TextBlock() { Text = " (" + ip + ")" });
-                        stp.Children.Add(new TextBlock() { Text = "   " + "0.0%" });
-                        ListBox1.Items.Add(stp);
-                    }));
-                }
-                System.IO.StreamWriter sw = new System.IO.StreamWriter(@".\Transform_" + jm.device + ".txt", true);
-                sw.WriteLine(JsonConvert.SerializeObject(jm));
+                setListBox(ip, ms);
+                // ファイルに位置情報を保存
+                var sw = new System.IO.StreamWriter(@".\Transform.txt", true);
+                sw.WriteLine(ms);
                 sw.Close();
             };
 
-            // restAPI
-            string user = "hololab";
-            string pass = "hololab";
+            // HoloLensのバッテリー残量取得
+            sendRestAPI();
+        }
+
+        /// <summary>
+        /// リストボックスを更新
+        /// </summary>
+        /// <param name="ip"></param>
+        /// <param name="ms"></param>
+        private void setListBox(string ip, string ms)
+        {
+            if (ipList.BinarySearch(ip) < 0)
+            {
+                var jm = new JsonMessage();
+                jm = JsonConvert.DeserializeObject<JsonMessage>(ms);
+                ipList.Add(ip);
+                ListBox1.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    var stp = new StackPanel();
+                    stp.Tag = ip;
+                    stp.Orientation = Orientation.Horizontal;
+                    stp.Children.Add(new TextBlock() { Text = " " + jm.device });
+                    stp.Children.Add(new TextBlock() { Text = " (" + ip + ")" });
+                    stp.Children.Add(new TextBlock() { Text = "   " + "0.0%" });
+                    ListBox1.Items.Add(stp);
+                }));
+            }
+        }
+
+        /// <summary>
+        /// RestAPIによるHoloLensデバイスのバッテリー残量情報取得
+        /// </summary>
+        private void sendRestAPI()
+        {
+            // 初期化
+            var user = "hololab";
+            var pass = "hololab";
             username.Text = user;
             password.Text = pass;
             Task.Run(async () =>
             {
+                // サーバー認証が必要な場合通過させる
                 ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslpolicyerrors) => true;
-                HttpClient httpClient = new HttpClient();
                 while (true)
                 {
-                    int count = 0;
+                    // ユーザー名，パスワード設定
                     await username.Dispatcher.BeginInvoke(new Action(() => { user = username.Text; }));
                     await password.Dispatcher.BeginInvoke(new Action(() => { pass = password.Text; }));
-                    Console.WriteLine(user);
+
+                    // ユーザー名とパスワードの暗号化
                     var param = Convert.ToBase64String(Encoding.UTF8.GetBytes(user + ":" + pass));
-                    httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", param);
-                    foreach (var item in deviceIPList)
+
+                    foreach (var item in ipList)
                     {
-                        var result = httpClient.GetAsync("https://" + item + "/api/power/battery").Result;
-                        var stringdata = await result.Content.ReadAsStringAsync();
-                        JsonDevicePortal jdp = new JsonDevicePortal();
-                        try
+                        using (var client = new HttpClient())
                         {
-                            jdp = JsonConvert.DeserializeObject<JsonDevicePortal>(stringdata);
-                            float battery = (float)jdp.RemainingCapacity / jdp.MaximumCapacity * 100;
-                            await ListBox1.Dispatcher.BeginInvoke(new Action(() =>
+                            // ユーザー名とパスワードをパラメータとして設定
+                            client.DefaultRequestHeaders.Authorization =
+                                new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", param);
+                            // RestAPIでGet要求
+                            var result = client.GetAsync("https://" + item + "/api/power/battery").Result;
+                            // レスポンスデータの取得
+                            var data = await result.Content.ReadAsStringAsync();
+                            var jdp = new JsonDevicePortal();
+                            // バッテリー情報の取得
+                            jdp = JsonConvert.DeserializeObject<JsonDevicePortal>(data);
+                            if (jdp != null)
                             {
-                                TextBlock tb = (TextBlock)((StackPanel)ListBox1.Items[count]).Children[2];
-                                tb.Text = "   " + battery.ToString("##.#") + "%";
-                            }));
+                                // バッテリー残量算出
+                                var battery = (float) jdp.RemainingCapacity / jdp.MaximumCapacity * 100;
+                                // 対象IPアドレスのリストにバッテリー残量更新
+                                await ListBox1.Dispatcher.BeginInvoke(new Action(() =>
+                                {
+                                    foreach (StackPanel box in ListBox1.Items)
+                                    {
+                                        if (box.Tag.Equals(item))
+                                        {
+                                            var tb = (TextBlock) box.Children[2];
+                                            tb.Text = "   " + battery.ToString("##.#") + "%";
+                                            break;
+                                        }
+                                    }
+                                }));
+                            }
                         }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine(e);
-                        }
-                        count++;
                     }
+
+                    // 10秒間隔で取得
                     await Task.Delay(10000);
                 }
             });
         }
     }
 
+    /// <summary>
+    /// UDP受信データ
+    /// </summary>
     [Serializable]
     public class JsonMessage
     {
         public string device = "";
-        public int h = 0, m = 0, s = 0;
+        public int h = 0, m = 0, s = 0, mm = 0;
         public float px = 0.0f, py = 0.0f, pz = 0.0f;
         public float rx = 0.0f, ry = 0.0f, rz = 0.0f, rw = 0.0f;
     }
 
+    /// <summary>
+    /// バッテリー状態データ
+    /// </summary>
     [Serializable]
     public class JsonDevicePortal
     {

@@ -1,87 +1,85 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
 namespace DeviceLogSystem
 {
+    /// <summary>
+    /// DeviceLogReceiverWPFで保存した位置情報を再現するサンプル
+    /// Pキーで再生，停止
+    /// 左右矢印キーで前後フレームへ移動
+    /// </summary>
     public class DeviceLogViewer : MonoBehaviour
     {
-        public GameObject CenterObject;
-        public GameObject LogObjectPrefab;
+        /// <summary>
+        /// 位置情報再生対象オブジェクト
+        /// </summary>
+        [SerializeField] private Transform target;
 
-        private List<JsonDataList> logObjectList = new List<JsonDataList>();
-        private long timecount = -1;
+        private List<JsonMessage> list = new List<JsonMessage>();
+        private int count = 0;
+        private bool playerFlag = false;
+        private float start,end,current ;
+
         // Use this for initialization
         void Start()
         {
-            LoadDataListFile(@"..\DeviceLogReceiverWPF\DeviceLogReceiverWPF\bin\Debug\Transform_HOLOLENS-2LBOV.txt");
+            target.parent = transform;
+            // ファイルを読み込んで位置情報をリストに格納
+            var path = @"..\DeviceLogReceiverWPF\DeviceLogReceiverWPF\bin\Debug\Transform.txt";
+            if (File.Exists(path) == true)
+            {
+                var json = new JsonMessage();
+                foreach (var line in File.ReadAllLines(path))
+                {
+                    json = JsonUtility.FromJson<JsonMessage>(line);
+                    if (json != null) list.Add(json);
+                }
+                Debug.Log("Loaded File");
+                start = list[0].GetTime();
+                end = list[list.Count - 1].GetTime();
+                current = start;
+                count = 0;
+            }
         }
 
         // Update is called once per frame
         void Update()
         {
+            // キーボードの左右矢印キーで時間を移動
             if (Input.GetKey(KeyCode.RightArrow))
             {
-                timecount++;
+                if (list.Count > count) count++;
             }
             if (Input.GetKey(KeyCode.LeftArrow))
             {
-                timecount--;
-                if (timecount < 0) timecount = 0;
+                if (count > 0) count--;
             }
 
-            foreach (var item in logObjectList)
+            // 自動再生
+            if (Input.GetKeyUp(KeyCode.P)) playerFlag = !playerFlag;
+            if (Input.GetKeyUp(KeyCode.R)) current = start;
+            if (playerFlag)
             {
-                item.SetObjectTransform(timecount);
-            }
-        }
-
-        private void LoadDataListFile(string path)
-        {
-            JsonDataList data = new JsonDataList(Instantiate(LogObjectPrefab, CenterObject.transform), Path.GetFileNameWithoutExtension(path));
-            if (File.Exists(path) == true)
-            {
-                var readlines = File.ReadAllLines(path);
-                for (int i = 0; i < readlines.Length; i++)
+                current += Time.deltaTime;
+                // 初めに戻す
+                if (current > end) current = start;
+                for (var i = 0; i < list.Count; i++)
                 {
-                    if (readlines[i].Length > 1)
+                    if (current <= list[i].GetTime())
                     {
-                        JsonMessage json = new JsonMessage();
-                        json = JsonUtility.FromJson<JsonMessage>(readlines[i]);
-                        if (json != null) data.device.Add(json);
+                        count = i;
+                        break;
                     }
                 }
-                long buf = data.device[0].h * 3600 + data.device[0].m * 60 + data.device[0].s;
-                if (timecount > buf || timecount<0) timecount = buf;
-                logObjectList.Add(data);
             }
-        }
-    }
 
-    [Serializable]
-    public class JsonDataList
-    {
-        public GameObject go;
-        public List<JsonMessage> device;
-        public JsonDataList(GameObject go, string name)
-        {
-            this.go = go;
-            this.go.name = name;
-            device = new List<JsonMessage>();
-        }
-        public void SetObjectTransform(long time)
-        {
-            foreach (var item in device)
+            // timecountに対応した位置情報を設定
+            if (list.Count > count)
             {
-                long buf = item.h * 3600 + item.m * 60 + item.s;
-                if (time <= buf)
-                {
-                    go.transform.localPosition = item.pos;
-                    go.transform.localRotation = item.rot;
-                    break;
-                }
+                target.localPosition = list[count].GetPos();
+                target.localRotation = list[count].GetRot();
             }
         }
     }
